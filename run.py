@@ -34,7 +34,7 @@ def main():
             error('Specified input file does not exists.')
 
         print('[-] Loading TeslaLog saved data...')
-        tl = TeslaLog.loads(args.ifile)
+        tl = Teslalog.loads(args.ifile)
         tl.username = args.username
         tl.password = args.password
         print('[-] Logging into Teslalog...')
@@ -46,12 +46,12 @@ def main():
 
     print('[-] Logged in..')
     print('[-] Listing available cars..')
-    tl.car_list()
+    tl.car_list(args.resume)
     print('[-] Car list fetched: ' + str(len(tl.cars)) + ' cars found')
     for car in tl.cars:
         print('\t+ ' + str(car))
         try:
-            tl.fetch_logs(car, True)
+            tl.fetch_logs(car, debug=True, resume=args.resume)
         except Exception as e:
             print('\t!! {}'.format(e))
 

@@ -50,6 +50,18 @@ class TeslaCar(object):
         self.trips = []
         self.charges = []
 
+    def isCharge(self, id):
+        for charge in self.charges:
+            if charge.id == id:
+                return True
+        return False
+
+    def isTrip(self, id):
+        for trip in self.trips:
+            if trip.id == id:
+                return True
+        return False
+
     def __str__(self):
         return '[' + str(self.id) + '][VIN: ' + self.vin + '][Name: ' + self.vehicle_name + ']'
 
@@ -233,8 +245,6 @@ class TeslaTrip(object):
     def add_climate(self, data):
         self.climate = data['climate_data']
 
-
-
 class Teslalog(object):
     def __init__(self, username, password):
         self.username = username
@@ -243,7 +253,6 @@ class Teslalog(object):
 
         self.login()
         self.cars = []
-
 
     def login(self):
         if self.r_cookie is not None:
@@ -270,8 +279,14 @@ class Teslalog(object):
         if r.status_code != requests.codes.ok:
             raise Exception('Error while running API check')
 
+    def isCar(self, id):
+        for car in self.cars:
+            if car.id == id:
+                return True
+        return False
 
-    def car_list(self):
+
+    def car_list(self, resume=False):
         if self.r_cookie is None:
             raise Exception('r_cookie is not set, aborting')
 
@@ -292,10 +307,10 @@ class Teslalog(object):
 
         for car in l_data:
             co = TeslaCar(car)
-            self.cars.append(co)
+            if not resume or not self.isCar(co.id):
+                self.cars.append(co)
 
-
-    def fetch_logs(self, car, debug=False):
+    def fetch_logs(self, car, debug=False, resume=False):
         if self.r_cookie is None:
             raise Exception('r_cookie is not set, aborting')
 
@@ -319,6 +334,7 @@ class Teslalog(object):
 
         for day in l_data:
             t_date = day['t_date']
+
             if debug: print('\t + Fetching logs for day ' + t_date + '...')
 
             p_listday = {'req': 'list', 'date': t_date, 'car_id': d_carid, 'offset': -120, 'geo_action_id': '' }
@@ -332,7 +348,12 @@ class Teslalog(object):
             if debug: print('\t + ' + str(len(r_data['list_data'])) + ' items found for that day')
             for entry in r_data['list_data']:
                 if entry['type'] == 'trip':
+
                     trip = TeslaTrip(entry)
+
+                    if resume and car.isTrip(trip.id):
+                        if debug: print('\t + Trip already there, skipping: ' + str(trip.id))
+                        continue
 
                     p_trip = {'req': 'trip', 'car_id': d_carid, 'trip_id': trip.id, 'unit': 'metric'}
                     if debug: print('\t\t> Fetching details on trip_id: ' + str(trip.id))
@@ -374,6 +395,10 @@ class Teslalog(object):
 
                     charge = TeslaCharge(entry)
 
+                    if resume and car.isCharge(charge.id):
+                        if debug: print('\t + Charging Session already there, skipping: ' + str(trip.id))
+                        continue
+
                     p_trip = {'req': 'charging_session', 'car_id': d_carid, 'charging_session_id': charge.id}
 
                     if debug: print('\t\t> Fetching details on charging_session_id: ' + str(charge.id))
@@ -407,7 +432,7 @@ class Teslalog(object):
                     raise Exception('Unknown type of log found: ' + r_data['list_data'][0]['type'])
 
     def loads(fname):
-        f = open("foo","r")
+        f = open(fname ,'r')
         return jsonpickle.decode(f.read())
 
     def dumps(self, fname):
