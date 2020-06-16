@@ -2,14 +2,34 @@
 
 import sys
 import argparse
+import os.path
 from teslalog import *
+
+def error(msg):
+    print('[!] ' + msg)
+    sys.exit(1)
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-u', '--username', dest='username', required=True, help='Teslalog username')
     parser.add_argument('-p', '--password', dest='password', required=True, help='Teslalog Password')
     parser.add_argument('-f', '--file', dest='fname', required=False, help='Filename to be used for the CSV output')
+    parser.add_argument('-i', '--input', dest='ifile', required=False, help='Filename to be used for the CSV input')
+    parser.add_argument('-r', '--resume', dest='resume', action='store_true', help='Resume fetching data')
     args = parser.parse_args()
+
+    if args.resume and not args.ifile:
+        error('Resuming the download of data needs input filename specified')
+
+    if not args.resume and args.ifile:
+        error('Input file can be specified only with resume mode..')
+
+    if args.resume:
+        if not os.path.exists(args.ifile):
+            error('Specified input file does not exists.')
+
+    if os.path.exists(args.fname):
+        error('Specified output file already exists.')
 
     print('[-] Login to TeslaLog in progress..');
     tl = Teslalog(args.username, args.password)
@@ -19,7 +39,10 @@ def main():
     print('[-] Car list fetched: ' + str(len(tl.cars)) + ' cars found')
     for car in tl.cars:
         print('\t+ ' + str(car))
-        tl.fetch_logs(car, True)
+        try:
+            tl.fetch_logs(car, True)
+        except Exception as e:
+            print('\t!! {}'.format(e))
 
     if args.fname is not None:
         tl.dumps(args.fname)
