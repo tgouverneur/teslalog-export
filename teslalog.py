@@ -5,6 +5,7 @@ import requests
 import sys
 import jsonpickle
 import simplejson
+import datetime
 
 class TeslaCar(object):
     def __init__(self, data):
@@ -119,7 +120,7 @@ class TeslaCharge(object):
         self.streaming = []
 
     def __str__(self):
-        return '[' + str(self.id) + '][' + self.charge_energy_added + ' Kwh added][' +  str(len(self.data)) + ' data points]'
+        return '[' + datetime.date.fromtimestamp(self.date).isoformat() + '][' + str(self.id) + '][' + self.charge_energy_added + ' Kwh added][' +  str(len(self.data)) + ' data points]'
 
     def add_data(self, data):
         if 'start_timestamp_ts' in data:
@@ -205,11 +206,11 @@ class TeslaTrip(object):
         if 'country' in self.end_loc:
             ret = ret + self.end_loc['country'] + ' '
 
-        return ret
+        return ret.strip()
 
 
     def __str__(self):
-        return '[' + str(self.id) + '][' + self.end_loc_str() + '][' + str(len(self.data)) + ' data points]'
+        return '[' + datetime.date.fromtimestamp(self.date).isoformat() + '][' + str(self.id) + '][' + self.end_loc_str() + '][' + str(len(self.data)) + ' data points]'
 
 
     def add_data(self, data):
