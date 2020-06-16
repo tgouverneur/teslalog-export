@@ -396,7 +396,7 @@ class Teslalog(object):
                     charge = TeslaCharge(entry)
 
                     if resume and car.isCharge(charge.id):
-                        if debug: print('\t + Charging Session already there, skipping: ' + str(trip.id))
+                        if debug: print('\t + Charging Session already there, skipping: ' + str(charge.id))
                         continue
 
                     p_trip = {'req': 'charging_session', 'car_id': d_carid, 'charging_session_id': charge.id}
