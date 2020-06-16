@@ -24,17 +24,28 @@ def main():
     if not args.resume and args.ifile:
         error('Input file can be specified only with resume mode..')
 
+    if args.fname and os.path.exists(args.fname):
+        error('Specified output file already exists.')
+
+    tl = None
+
     if args.resume:
         if not os.path.exists(args.ifile):
             error('Specified input file does not exists.')
 
-    if os.path.exists(args.fname):
-        error('Specified output file already exists.')
+        print('[-] Loading TeslaLog saved data...')
+        tl = TeslaLog.loads(args.ifile)
+        tl.username = args.username
+        tl.password = args.password
+        print('[-] Logging into Teslalog...')
+        tl.login()
 
-    print('[-] Login to TeslaLog in progress..');
-    tl = Teslalog(args.username, args.password)
-    print('[-] Logged in..');
-    print('[-] Listing available cars..');
+    else:
+        print('[-] Login to TeslaLog in progress..')
+        tl = Teslalog(args.username, args.password)
+
+    print('[-] Logged in..')
+    print('[-] Listing available cars..')
     tl.car_list()
     print('[-] Car list fetched: ' + str(len(tl.cars)) + ' cars found')
     for car in tl.cars:

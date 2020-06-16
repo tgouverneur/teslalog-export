@@ -6,7 +6,7 @@ import sys
 import jsonpickle
 import simplejson
 
-class TeslaCar:
+class TeslaCar(object):
     def __init__(self, data):
         if 'id' in data:
             self.id = data['id']
@@ -53,7 +53,7 @@ class TeslaCar:
     def __str__(self):
         return '[' + str(self.id) + '][VIN: ' + self.vin + '][Name: ' + self.vehicle_name + ']'
 
-class TeslaCharge:
+class TeslaCharge(object):
     def __init__(self, data):
         if 'id' in data:
             self.id = data['id']
@@ -137,7 +137,7 @@ class TeslaCharge:
         self.streaming = data['streaming_data']
 
 
-class TeslaTrip:
+class TeslaTrip(object):
     def __init__(self, data):
         if 'id' in data:
             self.id = data['id']
@@ -235,7 +235,7 @@ class TeslaTrip:
 
 
 
-class Teslalog:
+class Teslalog(object):
     def __init__(self, username, password):
         self.username = username
         self.password = password
@@ -405,6 +405,10 @@ class Teslalog:
 
                 else:
                     raise Exception('Unknown type of log found: ' + r_data['list_data'][0]['type'])
+
+    def loads(fname):
+        f = open("foo","r")
+        return jsonpickle.decode(f.read())
 
     def dumps(self, fname):
         """ Avoid passwords/username/token to be present in the dump... """
