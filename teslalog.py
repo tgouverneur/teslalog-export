@@ -6,6 +6,7 @@ import sys
 import jsonpickle
 import simplejson
 import datetime
+import time
 
 class TeslaCar(object):
     def __init__(self, data):
@@ -311,9 +312,14 @@ class Teslalog(object):
             if not resume or not self.isCar(co.id):
                 self.cars.append(co)
 
-    def fetch_logs(self, car, debug=False, resume=False):
+    def fetch_logs(self, car, debug=False, resume=False, before=None):
         if self.r_cookie is None:
             raise Exception('r_cookie is not set, aborting')
+
+        if before:
+            before = int(time.mktime(datetime.datetime.strptime(before, '%Y-%m-%d').timetuple()))
+        else:
+            before = None
 
         d_carid = car.id
         headers = {'Cookie': '_tlkk=' + self.r_cookie}
@@ -335,6 +341,11 @@ class Teslalog(object):
 
         for day in l_data:
             t_date = day['t_date']
+            t_date_ts = int(time.mktime(datetime.datetime.strptime(t_date, '%Y-%m-%d').timetuple()))
+
+            if before and t_date_ts > before:
+                if debug: print('\t + Skipping day: ' + t_date)
+                continue
 
             if debug: print('\t + Fetching logs for day ' + t_date + '...')
 

@@ -29,7 +29,7 @@ def main():
 
     print('[-] Listing cars & other data...')
     for car in tl.cars:
-        print('\tc> ' + str(car))
+        print('\tc> ' + str(car) + ' [' + str(len(car.trips)) + ' trips][' + str(len(car.charges)) + ' charging sessions]')
         if args.trips:
             for trip in car.trips:
                 print('\t\ttrip> ' + str(trip))
