@@ -312,7 +312,7 @@ class Teslalog(object):
             if not resume or not self.isCar(co.id):
                 self.cars.append(co)
 
-    def fetch_logs(self, car, debug=False, resume=False, before=None):
+    def fetch_logs(self, car, debug=False, resume=False, before=None, skip=False):
         if self.r_cookie is None:
             raise Exception('r_cookie is not set, aborting')
 
@@ -365,6 +365,10 @@ class Teslalog(object):
 
                     if resume and car.isTrip(trip.id):
                         if debug: print('\t + Trip already there, skipping: ' + str(trip.id))
+                        continue
+
+                    if trip.id is False or trip.id == '':
+                        if debug: print('Error fetching trip, trip_id is not set, skipping..')
                         continue
 
                     p_trip = {'req': 'trip', 'car_id': d_carid, 'trip_id': trip.id, 'unit': 'metric'}

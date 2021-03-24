@@ -17,6 +17,7 @@ def main():
     parser.add_argument('-i', '--input', dest='ifile', required=False, help='Filename to be used for the CSV input')
     parser.add_argument('-r', '--resume', dest='resume', action='store_true', help='Resume fetching data')
     parser.add_argument('-b', '--before', dest='before', required=False, help='Date before which we need to browse YYYY-MM-DD')
+    parser.add_argument('-s', '--skip', dest='skip', required=False, help='Skip error encountered and try to fetch as much as possible anyway')
     args = parser.parse_args()
 
     if args.resume and not args.ifile:
@@ -52,7 +53,7 @@ def main():
     for car in tl.cars:
         print('\t+ ' + str(car))
         try:
-            tl.fetch_logs(car, debug=True, resume=args.resume, before=args.before)
+            tl.fetch_logs(car, debug=True, resume=args.resume, before=args.before, skip=args.skip)
         except Exception as e:
             print('\t!! {}'.format(e))
 
